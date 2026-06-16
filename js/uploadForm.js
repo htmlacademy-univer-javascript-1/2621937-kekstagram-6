@@ -1,3 +1,5 @@
+import { sendFormData } from './api.js';
+
 const uploadForm = document.querySelector('.img-upload__form');
 const uploadFileInput = uploadForm?.querySelector('.img-upload__input');
 const uploadOverlay = uploadForm?.querySelector('.img-upload__overlay');
@@ -76,6 +78,77 @@ const validateDescription = (value) => value.length <= 140;
 
 const getDescriptionErrorMessage = () => 'Комментарий не может превышать 140 символов.';
 
+/**
+ * Показывает сообщение об успешной загрузке
+ */
+function showSuccessMessage() {
+  const template = document.querySelector('#success');
+  if (!template) return;
+
+  const successElement = template.content.cloneNode(true);
+  const successButton = successElement.querySelector('.success__button');
+
+  body.appendChild(successElement);
+
+  const closeSuccess = () => {
+    const successSection = body.querySelector('.success');
+    if (successSection) {
+      successSection.remove();
+    }
+    document.removeEventListener('keydown', onSuccessKeyDown);
+  };
+
+  const onSuccessKeyDown = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      closeSuccess();
+    }
+  };
+
+  if (successButton) {
+    successButton.addEventListener('click', closeSuccess);
+  }
+
+  document.addEventListener('keydown', onSuccessKeyDown);
+}
+
+/**
+ * Показывает сообщение об ошибке загрузки
+ */
+function showErrorMessage() {
+  const template = document.querySelector('#error');
+  if (!template) return;
+
+  const errorElement = template.content.cloneNode(true);
+  const errorButton = errorElement.querySelector('.error__button');
+
+  body.appendChild(errorElement);
+
+  const closeError = () => {
+    const errorSection = body.querySelector('.error');
+    if (errorSection) {
+      errorSection.remove();
+    }
+    document.removeEventListener('keydown', onErrorKeyDown);
+  };
+
+  const onErrorKeyDown = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      closeError();
+    }
+  };
+
+  if (errorButton) {
+    errorButton.addEventListener('click', () => {
+      closeError();
+      openUploadOverlay();
+    });
+  }
+
+  document.addEventListener('keydown', onErrorKeyDown);
+}
+
 const closeUploadOverlay = () => {
   if (!uploadOverlay) {
     return;
@@ -128,9 +201,22 @@ const onCancelButtonClick = (evt) => {
   closeUploadOverlay();
 };
 
-const onFormSubmit = (evt) => {
+const onFormSubmit = async (evt) => {
+  evt.preventDefault();
+
   if (pristine && !pristine.validate()) {
-    evt.preventDefault();
+    return;
+  }
+
+  try {
+    const formData = new FormData(uploadForm);
+    await sendFormData(formData);
+
+    closeUploadOverlay();
+    showSuccessMessage();
+  } catch (error) {
+    console.error('Ошибка при отправке формы:', error);
+    showErrorMessage();
   }
 };
 
