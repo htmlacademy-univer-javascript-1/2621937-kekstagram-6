@@ -1,5 +1,3 @@
-import { generatePhotos } from './data.js';
+import { initializeGallery } from './renderPictures.js';
 
-const photos = generatePhotos();
-window.photos = photos;
-console.log('Generated', photos.length, 'photos');
+initializeGallery();
