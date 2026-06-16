@@ -1,4 +1,5 @@
 import { generatePhotos } from './data.js';
+import { openBigPicture } from './bigPicture.js';
 
 function createPictureElement(photo, template) {
   const pictureElement = template.cloneNode(true);
@@ -10,6 +11,11 @@ function createPictureElement(photo, template) {
   image.alt = photo.description;
   likesElement.textContent = photo.likes;
   commentsElement.textContent = photo.comments.length;
+
+  pictureElement.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    openBigPicture(photo);
+  });
 
   return pictureElement;
 }
