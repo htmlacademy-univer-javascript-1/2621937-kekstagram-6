@@ -1,4 +1,4 @@
-import { generatePhotos } from './data.js';
+import { getPhotos } from './data.js';
 import { openBigPicture } from './bigPicture.js';
 
 function createPictureElement(photo, template) {
@@ -37,9 +37,41 @@ export function renderPictures(photos) {
   picturesContainer.appendChild(fragment);
 }
 
-export function initializeGallery() {
-  const photos = generatePhotos();
-  renderPictures(photos);
-  window.photos = photos;
-  console.log('Generated', photos.length, 'photos');
+/**
+ * Показывает сообщение об ошибке загрузки фотографий
+ * @param {string} message - Текст ошибки
+ */
+function showErrorMessage(message) {
+  const picturesContainer = document.querySelector('.pictures');
+  if (!picturesContainer) {
+    return;
+  }
+
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.style.cssText = `
+    padding: 20px;
+    margin: 20px 0;
+    background-color: #fff5f5;
+    border: 2px solid #ff6b6b;
+    border-radius: 8px;
+    color: #ff6b6b;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+  `;
+  errorDiv.textContent = message;
+
+  picturesContainer.appendChild(errorDiv);
+}
+
+export async function initializeGallery() {
+  try {
+    const photos = await getPhotos();
+    renderPictures(photos);
+    window.photos = photos;
+  } catch (error) {
+    console.error('Ошибка при загрузке фотографий:', error);
+    showErrorMessage(error.message);
+  }
 }
