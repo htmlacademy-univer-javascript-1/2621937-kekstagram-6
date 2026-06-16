@@ -162,6 +162,19 @@ const closeUploadOverlay = () => {
     uploadFileInput.value = '';
   }
 
+  // Reset preview image and effects
+  const previewImg = uploadForm?.querySelector('.img-upload__preview img');
+  if (previewImg) {
+    previewImg.src = 'img/upload-default-image.jpg';
+    previewImg.style.filter = '';
+    previewImg.style.transform = '';
+  }
+
+  const scaleValue = uploadForm?.querySelector('.scale__control--value');
+  if (scaleValue) {
+    scaleValue.value = '100%';
+  }
+
   if (pristine) {
     pristine.reset();
   }
@@ -176,6 +189,14 @@ const openUploadOverlay = () => {
   body.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeyDown);
 
+  // Reset scale to 100% when opening overlay
+  const scaleValue = uploadForm?.querySelector('.scale__control--value');
+  const previewImg = uploadForm?.querySelector('.img-upload__preview img');
+  if (scaleValue && previewImg) {
+    scaleValue.value = '100%';
+    previewImg.style.transform = '';
+  }
+
   if (pristine) {
     pristine.reset();
   }
@@ -189,6 +210,23 @@ function onDocumentKeyDown(evt) {
 }
 
 const onFileInputChange = () => {
+  if (uploadFileInput?.files?.[0]) {
+    const file = uploadFileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (evt) => {
+      const previewImg = uploadForm?.querySelector('.img-upload__preview img');
+      if (previewImg && evt.target?.result) {
+        previewImg.src = evt.target.result;
+        // Reset preview effects
+        previewImg.style.filter = '';
+        previewImg.style.transform = '';
+      }
+    };
+
+    reader.readAsDataURL(file);
+  }
+
   openUploadOverlay();
 };
 
@@ -198,6 +236,19 @@ const onCancelButtonClick = (evt) => {
   if (uploadFileInput) {
     uploadFileInput.value = '';
   }
+
+  // Reset preview effects manually when closing form
+  const previewImg = uploadForm?.querySelector('.img-upload__preview img');
+  if (previewImg) {
+    previewImg.style.filter = '';
+    previewImg.style.transform = '';
+  }
+
+  const scaleValue = uploadForm?.querySelector('.scale__control--value');
+  if (scaleValue) {
+    scaleValue.value = '100%';
+  }
+
   closeUploadOverlay();
 };
 
